@@ -19,7 +19,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm ci  # lebih cepat dan andal daripada npm install [citation:5]
+        run: npm install # lebih cepat dan andal daripada npm install [citation:5]
 
       - name: Build project
         run: npm run build
