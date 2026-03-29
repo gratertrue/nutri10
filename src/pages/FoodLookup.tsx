@@ -6,6 +6,7 @@ import { getStoredData, STORAGE_KEYS, setStoredData, updatePoints } from '@/lib/
 import { Search, Info, AlertTriangle, CheckCircle2, Plus, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { showSuccess, showError } from '@/utils/toast';
+import { cn } from '@/lib/utils';
 
 const FoodLookup = () => {
   const [query, setQuery] = useState('');

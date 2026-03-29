@@ -3,6 +3,7 @@ import GlassCard from '@/components/GlassCard';
 import { getStoredData, setStoredData, STORAGE_KEYS } from '@/lib/storage';
 import { User, Activity, Heart, Target } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
+import { cn } from '@/lib/utils';
 
 const Profile = () => {
   const [profile, setProfile] = useState(() => getStoredData(STORAGE_KEYS.USER_PROFILE, {

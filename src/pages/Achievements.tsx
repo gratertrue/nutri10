@@ -4,6 +4,7 @@ import { getStoredData, STORAGE_KEYS } from '@/lib/storage';
 import { Trophy, Star, Zap, Flame, Award, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { cn } from '@/lib/utils';
 
 const achievementsList = [
   { id: 'streak_3', title: 'Consistent Eater', desc: 'Log food for 3 consecutive days', icon: Flame, color: 'text-orange-400', points: 100 },
@@ -42,7 +43,8 @@ const Achievements = () => {
               <span className="text-white font-bold">Level {level} Explorer</span>
               <span className="text-slate-400 text-sm">{points % 500} / 500 XP</span>
             </div>
-            <div className="h-3 bg-white/5 rounded-full overflow-hidden">
+            <div className="h-3 bg-white/5 rounded-full overflow
+-hidden">
               <motion.div 
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
