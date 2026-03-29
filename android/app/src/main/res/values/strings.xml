@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">wild-beluga-dash</string>
+    <string name="title_activity_main">wild-beluga-dash</string>
+    <string name="package_name">com.example.wildbelugadash</string>
+    <string name="custom_url_scheme">com.example.wildbelugadash</string>
+</resources>
