@@ -1,17 +1,150 @@
-// Update this page (the content is just a fallback if you fail to update the page)
-
-import { MadeWithDyad } from "@/components/made-with-dyad";
+import React, { useEffect, useState } from 'react';
+import GlassCard from '@/components/GlassCard';
+import { getStoredData, STORAGE_KEYS } from '@/lib/storage';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import { Flame, Target, TrendingUp, Award } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const Index = () => {
+  const [profile] = useState(() => getStoredData(STORAGE_KEYS.USER_PROFILE, { name: 'User', calorieGoal: 2000 }));
+  const [points] = useState(() => getStoredData(STORAGE_KEYS.POINTS, 0));
+  const [log] = useState(() => getStoredData(STORAGE_KEYS.FOOD_LOG, []));
+
+  const today = new Date().toISOString().split('T')[0];
+  const todayLog = log.filter((item: any) => item.date === today);
+  
+  const consumedCalories = todayLog.reduce((acc: number, curr: any) => acc + curr.calories, 0);
+  const remaining = Math.max(0, profile.calorieGoal - consumedCalories);
+
+  const macroData = [
+    { name: 'Protein', value: todayLog.reduce((acc: number, curr: any) => acc + (curr.protein || 0), 0), color: '#22d3ee' },
+    { name: 'Carbs', value: todayLog.reduce((acc: number, curr: any) => acc + (curr.carbs || 0), 0), color: '#a855f7' },
+    { name: 'Fat', value: todayLog.reduce((acc: number, curr: any) => acc + (curr.fat || 0), 0), color: '#f472b6' },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">
-          Start building your amazing project here!
-        </p>
+    <div className="p-8 space-y-8 max-w-7xl mx-auto">
+      <header className="flex justify-between items-end">
+        <div>
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-3xl font-bold text-white mb-2"
+          >
+            Welcome back, {profile.name}!
+          </motion.h2>
+          <p className="text-slate-400">Here's your nutrition intelligence overview for today.</p>
+        </div>
+        <div className="flex gap-4">
+          <GlassCard className="py-2 px-4 flex items-center gap-2">
+            <Award className="text-yellow-400" size={20} />
+            <span className="text-white font-bold">{points} pts</span>
+          </GlassCard>
+        </div>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <GlassCard className="relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <Flame size={80} className="text-orange-500" />
+          </div>
+          <h3 className="text-slate-400 text-sm font-medium mb-4">Daily Calories</h3>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-bold text-white">{consumedCalories}</span>
+            <span className="text-slate-500">/ {profile.calorieGoal} kcal</span>
+          </div>
+          <div className="mt-6 h-2 bg-white/5 rounded-full overflow-hidden">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.min(100, (consumedCalories / profile.calorieGoal) * 100)}%` }}
+              className="h-full bg-gradient-to-r from-cyan-500 to-blue-500"
+            />
+          </div>
+          <p className="mt-4 text-sm text-cyan-400 font-medium">{remaining} kcal remaining</p>
+        </GlassCard>
+
+        <GlassCard className="md:col-span-2">
+          <h3 className="text-slate-400 text-sm font-medium mb-4">Macro Distribution</h3>
+          <div className="grid grid-cols-2 gap-8">
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={macroData}
+                    innerRadius={50}
+                    outerRadius={70}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {macroData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '8px', color: '#fff' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex flex-col justify-center space-y-4">
+              {macroData.map((macro) => (
+                <div key={macro.name} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: macro.color }} />
+                    <span className="text-slate-300">{macro.name}</span>
+                  </div>
+                  <span className="text-white font-bold">{macro.value.toFixed(1)}g</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </GlassCard>
       </div>
-      <MadeWithDyad />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <GlassCard>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-white font-bold flex items-center gap-2">
+              <TrendingUp size={20} className="text-cyan-400" />
+              Weekly Progress
+            </h3>
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={log.slice(-7)}>
+                <XAxis dataKey="date" stroke="#64748b" fontSize={12} tickFormatter={(val) => val.split('-')[2]} />
+                <YAxis stroke="#64748b" fontSize={12} />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '8px' }}
+                />
+                <Bar dataKey="calories" fill="#22d3ee" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </GlassCard>
+
+        <GlassCard>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-white font-bold flex items-center gap-2">
+              <Target size={20} className="text-purple-400" />
+              AI Insights
+            </h3>
+          </div>
+          <div className="space-y-4">
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+              <p className="text-slate-300 text-sm leading-relaxed">
+                "Based on your activity levels, you're hitting your protein goals consistently. Consider increasing fiber intake during lunch to maintain energy levels."
+              </p>
+            </div>
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+              <p className="text-slate-300 text-sm leading-relaxed">
+                "You tend to consume 20% more calories on weekends. Try meal prepping on Fridays to stay on track."
+              </p>
+            </div>
+          </div>
+        </GlassCard>
+      </div>
     </div>
   );
 };
